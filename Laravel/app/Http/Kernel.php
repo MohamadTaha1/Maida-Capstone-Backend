@@ -42,6 +42,8 @@ class Kernel extends HttpKernel
             // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \Illuminate\Session\Middleware\StartSession::class,
+            \Illuminate\View\Middleware\ShareErrorsFromSession::class,
         ],
     ];
 
@@ -65,6 +67,6 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'chef' => \App\Http\Middleware\EnsureUserIsChef::class,
-        'delivery' => \App\Http\Middleware\EnsureUserIsDeliveryPersonnel::class, 
+        'delivery' => \App\Http\Middleware\EnsureUserIsDeliveryPersonnel::class,
     ];
 }
