@@ -25,9 +25,7 @@ class AuthController extends Controller
                     'user' => $user
                 ], 200);
             }
-            else{
-                return;
-            }
+            
 
             return response()->json(['error' => 'Invalid credentials'], 401);
         }
