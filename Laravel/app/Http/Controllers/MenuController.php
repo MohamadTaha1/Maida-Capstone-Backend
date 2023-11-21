@@ -18,6 +18,10 @@ class MenuController extends Controller
     // Store a newly created menu in the database
     public function store(Request $request)
     {
+        if (!Gate::allows('manage-menus') || $menu->restaurant->owner_id !== auth()->id()) {
+            return response()->json(['message' => 'This action is unauthorized.'], 403);
+        }
+
         $validatedData = $request->validate([
             'restaurant_id' => 'required|exists:restaurants,id',
             'title' => 'required|max:255',
@@ -43,6 +47,11 @@ class MenuController extends Controller
     // Update the specified menu in the database
     public function update(Request $request, $id)
     {
+         // Check if the user is authorized to manage menus
+         if (!Gate::allows('manage-menus') || $menu->restaurant->owner_id !== auth()->id()) {
+            return response()->json(['message' => 'This action is unauthorized.'], 403);
+        }
+
         $menu = Menu::find($id);
 
         if (!$menu) {
@@ -62,6 +71,10 @@ class MenuController extends Controller
     // Remove the specified menu from the database
     public function destroy($id)
     {
+        if (!Gate::allows('manage-menus') || $menu->restaurant->owner_id !== auth()->id()) {
+            return response()->json(['message' => 'This action is unauthorized.'], 403);
+        }
+
         $menu = Menu::find($id);
 
         if (!$menu) {
