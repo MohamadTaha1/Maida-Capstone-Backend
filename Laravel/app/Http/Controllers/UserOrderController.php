@@ -37,27 +37,40 @@ class UserOrderController extends Controller
     // Store a newly created order for a user
     public function store(Request $request, $userId)
     {
-        // Validate request and create an order for the user
-        // ...
+        $validatedData = $request->validate([
+            // Validate your order fields, e.g.:
+            'status' => 'required|in:pending,accepted,preparing,on_the_way,delivered,cancelled',
+            'total_price' => 'required|numeric',
+            // ... other fields
+        ]);
+
+        $user = User::findOrFail($userId);
+        $order = $user->orders()->create($validatedData);
+
+        return response()->json($order, 201);
     }
 
     // Update the specified order for a user
     public function update(Request $request, $userId, $orderId)
     {
-        // Update an existing order for the user
-        // ...
+        $order = Order::where('user_id', $userId)->where('id', $orderId)->firstOrFail();
+
+        $validatedData = $request->validate([
+            // Validate your order fields, e.g.:
+            'status' => 'sometimes|in:pending,accepted,preparing,on_the_way,delivered,cancelled',
+        ]);
+
+        $order->update($validatedData);
+
+        return response()->json($order);
     }
 
     // Cancel the specified order for a user
     public function destroy($userId, $orderId)
     {
-        $order = Order::where('user_id', $userId)->where('id', $orderId)->first();
+        $order = Order::where('user_id', $userId)->where('id', $orderId)->firstOrFail();
+        $order->delete();
 
-        if (!$order) {
-            return response()->json(['message' => 'Order not found or does not belong to this user'], 404);
-        }
-
-        // Logic for canceling the order
-        // ...
+        return response()->json(['message' => 'Order cancelled successfully']);
     }
 }

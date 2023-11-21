@@ -13,11 +13,6 @@ class DishController extends Controller
         return response()->json($dishes);
     }
 
-    // Show the form for creating a new dish
-    public function create()
-    {
-        // return view for creating a new dish
-    }
 
     // Store a newly created dish in the database
     public function store(Request $request)
@@ -36,21 +31,9 @@ class DishController extends Controller
     }
 
     // Display the specified dish
-    public function show($id)
+    public function show(Dish $dish)
     {
-        $dish = Dish::find($id);
-
-        if (!$dish) {
-            return response()->json(['message' => 'Dish not found'], 404);
-        }
-
         return response()->json($dish);
-    }
-
-    // Show the form for editing the specified dish
-    public function edit($id)
-    {
-        // return view for editing the dish
     }
 
     // Update the specified dish in the database
@@ -76,14 +59,9 @@ class DishController extends Controller
     }
 
     // Remove the specified dish from the database
-    public function destroy($id)
+
+    public function destroy(Dish $dish)
     {
-        $dish = Dish::find($id);
-
-        if (!$dish) {
-            return response()->json(['message' => 'Dish not found'], 404);
-        }
-
         $dish->delete();
         return response()->json(['message' => 'Dish deleted successfully']);
     }

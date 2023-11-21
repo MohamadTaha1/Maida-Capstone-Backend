@@ -15,12 +15,6 @@ class MenuController extends Controller
         return response()->json($menus);
     }
 
-    // Show the form for creating a new menu
-    public function create()
-    {
-        // return view for creating a new menu
-    }
-
     // Store a newly created menu in the database
     public function store(Request $request)
     {
@@ -44,12 +38,6 @@ class MenuController extends Controller
         }
 
         return response()->json($menu);
-    }
-
-    // Show the form for editing the specified menu
-    public function edit($id)
-    {
-        // return view for editing the menu
     }
 
     // Update the specified menu in the database
