@@ -24,35 +24,42 @@ use App\Http\Controllers\UserOrderController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-
+// Authentication Routes
 Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::post('/register', [AuthController::class, 'register']);
+Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return $request->user();
+});
 
+// Restaurant Routes
 Route::get('/restaurants/search', [RestaurantController::class, 'search']);
 Route::get('/restaurants/{id}', [RestaurantController::class, 'show']);
 Route::get('/restaurants', [RestaurantController::class, 'index']);
+// Protected routes for restaurant owners
+Route::middleware(['auth:sanctum', 'isOwner'])->group(function () {
+    Route::post('/restaurants', [RestaurantController::class, 'create']);
+    Route::put('/restaurants/{restaurant}', [RestaurantController::class, 'update']);
+    Route::delete('/restaurants/{restaurant}', [RestaurantController::class, 'destroy']);
+});
 
-Route::apiResource('dishes', DishController::class);
-Route::get('/dishes', [DishController::class, 'index']);
-Route::post('/dishes', [DishController::class, 'store']);
-Route::get('/dishes/{id}', [DishController::class, 'show']);
-Route::put('/dishes/{id}', [DishController::class, 'update']);
-Route::delete('/dishes/{id}', [DishController::class, 'destroy']);
+// Menu Routes
+Route::middleware(['auth:sanctum', 'isOwner'])->group(function () {
+    Route::apiResource('/menus', MenuController::class);
+});
 
-Route::apiResource('/menus', MenuController::class);
+// Dish Routes
+// Assuming that only owners should manage dishes
+Route::middleware(['auth:sanctum', 'isOwner'])->group(function () {
+    Route::apiResource('dishes', DishController::class);
+});
 
-
-
-// Nested User Orders Routes
-Route::prefix('users/{userId}/orders')->group(function () {
+// User Orders Routes
+Route::middleware('auth:sanctum')->prefix('users/{userId}/orders')->group(function () {
+    Route::apiResource('/', UserOrderController::class)->except(['index', 'store', 'show', 'update', 'destroy']);
     Route::get('/', [UserOrderController::class, 'index']);
     Route::post('/', [UserOrderController::class, 'store']);
     Route::get('/{orderId}', [UserOrderController::class, 'show']);
     Route::put('/{orderId}', [UserOrderController::class, 'update']);
     Route::delete('/{orderId}', [UserOrderController::class, 'destroy']);
 });
-
-
-
-

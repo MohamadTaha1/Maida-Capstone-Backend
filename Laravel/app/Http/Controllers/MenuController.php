@@ -4,6 +4,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Menu;
+use App\Models\Restaurant;
 use Illuminate\Http\Request;
 
 class MenuController extends Controller
@@ -18,18 +19,20 @@ class MenuController extends Controller
     // Store a newly created menu in the database
     public function store(Request $request)
     {
-        if (!Gate::allows('manage-menus') || $menu->restaurant->owner_id !== auth()->id()) {
-            return response()->json(['message' => 'This action is unauthorized.'], 403);
-        }
-
         $validatedData = $request->validate([
             'restaurant_id' => 'required|exists:restaurants,id',
             'title' => 'required|max:255',
             'description' => 'required',
         ]);
 
+        $restaurant = Restaurant::find($validatedData['restaurant_id']);
+
+        if ($restaurant->owner_id !== auth()->id()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $menu = Menu::create($validatedData);
-        return response()->json($menu, 201);
+        return response()->json(['message' => 'Menu created successfully', 'menu' => $menu]);
     }
 
     // Display the specified menu
@@ -47,15 +50,15 @@ class MenuController extends Controller
     // Update the specified menu in the database
     public function update(Request $request, $id)
     {
-         // Check if the user is authorized to manage menus
-         if (!Gate::allows('manage-menus') || $menu->restaurant->owner_id !== auth()->id()) {
-            return response()->json(['message' => 'This action is unauthorized.'], 403);
-        }
-
         $menu = Menu::find($id);
 
         if (!$menu) {
             return response()->json(['message' => 'Menu not found'], 404);
+        }
+
+        // Directly compare owner ID
+        if ($menu->restaurant->owner_id !== auth()->id()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         $validatedData = $request->validate([
@@ -71,17 +74,19 @@ class MenuController extends Controller
     // Remove the specified menu from the database
     public function destroy($id)
     {
-        if (!Gate::allows('manage-menus') || $menu->restaurant->owner_id !== auth()->id()) {
-            return response()->json(['message' => 'This action is unauthorized.'], 403);
-        }
-
         $menu = Menu::find($id);
 
         if (!$menu) {
             return response()->json(['message' => 'Menu not found'], 404);
         }
 
+        // Directly compare owner ID
+        if ($menu->restaurant->owner_id !== auth()->id()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $menu->delete();
         return response()->json(['message' => 'Menu deleted successfully']);
     }
+
 }

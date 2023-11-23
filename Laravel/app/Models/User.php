@@ -19,6 +19,13 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
+
+     public function ownedRestaurants()
+    {
+        return $this->hasMany(Restaurant::class, 'owner_id');
+    }
+
+
     protected $fillable = [
         'name',
         'email',

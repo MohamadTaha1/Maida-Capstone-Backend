@@ -69,4 +69,9 @@ class Kernel extends HttpKernel
         'chef' => \App\Http\Middleware\EnsureUserIsChef::class,
         'delivery' => \App\Http\Middleware\EnsureUserIsDeliveryPersonnel::class,
     ];
+
+    protected $routeMiddleware = [
+        // ... other middleware ...
+        'isOwner' => \App\Http\Middleware\EnsureIsOwner::class,
+    ];
 }

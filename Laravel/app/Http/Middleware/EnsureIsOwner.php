@@ -2,19 +2,20 @@
 
 namespace App\Http\Middleware;
 
+namespace App\Http\Middleware;
+
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
-class EnsureUserIsChef
+class EnsureIsOwner
 {
     public function handle(Request $request, Closure $next)
     {
-        if (Auth::check() && Auth::user()->role === 'chef') {
+        if (auth()->user() && auth()->user()->role === 'Owner') {
             return $next($request);
         }
 
-        return response()->json(['error' => 'Unauthorized'], 403);
+        return response()->json(['message' => 'Access denied'], 403);
     }
 }
 

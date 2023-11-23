@@ -36,5 +36,69 @@ class RestaurantController extends Controller
         return response()->json($restaurants);
     }
 
+    public function create(Request $request)
+    {
+        $validatedData = $request->validate([
+            'name' => 'required|max:255',
+            'description' => 'required',
+            'address' => 'required',
+            'phone_number' => 'required',
+            'email' => 'required|email',
+            'image' => 'required|url',
+        ]);
+
+        $validatedData['owner_id'] = auth()->id();
+
+        $restaurant = Restaurant::create($validatedData);
+
+        return response()->json(['message' => 'Restaurant created successfully', 'restaurant' => $restaurant]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $restaurant = Restaurant::find($id);
+
+        if (!$restaurant) {
+            return response()->json(['message' => 'Restaurant not found'], 404);
+        }
+
+        if ($restaurant->owner_id !== auth()->id()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $validatedData = $request->validate([
+            'name' => 'sometimes|max:255',
+            'description' => 'sometimes',
+            'address' => 'sometimes',
+            'phone_number' => 'sometimes',
+            'email' => 'sometimes|email',
+            'image' => 'sometimes|url',
+        ]);
+
+        $restaurant->update($validatedData);
+
+        return response()->json(['message' => 'Restaurant updated successfully', 'restaurant' => $restaurant]);
+    }
+
+
+    public function destroy($id)
+    {
+        $restaurant = Restaurant::find($id);
+
+        if (!$restaurant) {
+            return response()->json(['message' => 'Restaurant not found'], 404);
+        }
+
+        if ($restaurant->owner_id !== auth()->id()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $restaurant->delete();
+
+        return response()->json(['message' => 'Restaurant deleted successfully']);
+    }
+
+
+
 
 }
