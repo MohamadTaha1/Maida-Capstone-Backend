@@ -8,14 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 class Menu extends Model
 {
 
+    public function restaurant()
+    {
+        return $this->belongsTo(Restaurant::class, 'restaurant_id');
+    }
+
     public function dishes()
     {
         return $this->hasMany(Dish::class);
-    }
-
-    public function restaurant()
-    {
-        return $this->belongsTo(Restaurant::class);
     }
 
 
@@ -23,7 +23,7 @@ class Menu extends Model
         'restaurant_id',
         'title',
         'description',
-        
+
     ];
 
 

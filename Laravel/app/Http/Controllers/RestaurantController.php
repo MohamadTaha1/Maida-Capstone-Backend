@@ -5,19 +5,31 @@
 namespace App\Http\Controllers;
 
 use App\Models\Restaurant;
+use App\Models\Dish;
+use App\Models\Menu;
 use Illuminate\Http\Request;
 
 class RestaurantController extends Controller
 {
+
+
     public function index()
     {
-        $restaurants = Restaurant::all(); // Or add any logic to filter the restaurants
+        $restaurants = Restaurant::all(); 
+        return response()->json($restaurants);
+    }
+
+    public function getOwnerRestaurants()
+    {
+        $ownerId = auth()->id(); // Get the logged-in user's ID
+        $restaurants = Restaurant::where('owner_id', $ownerId)->get(); // Fetch restaurants owned by the user
+
         return response()->json($restaurants);
     }
 
     public function show($id)
     {
-        $restaurant = Restaurant::find($id); // Retrieves a specific restaurant by ID
+        $restaurant = Restaurant::with('menus.dishes')->find($id); // Include menus and their dishes
 
         if (!$restaurant) {
             return response()->json(['message' => 'Restaurant not found'], 404);
@@ -97,8 +109,5 @@ class RestaurantController extends Controller
 
         return response()->json(['message' => 'Restaurant deleted successfully']);
     }
-
-
-
 
 }

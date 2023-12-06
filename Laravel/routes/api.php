@@ -7,6 +7,10 @@ use App\Http\Controllers\RestaurantController;
 use App\Http\Controllers\DishController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\UserOrderController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\OrderDetailController;
+
 
 
 
@@ -24,6 +28,9 @@ use App\Http\Controllers\UserOrderController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::middleware('auth:sanctum')->get('/user/profile', [UserController::class, 'profile']);
+
 // Authentication Routes
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
@@ -38,6 +45,7 @@ Route::get('/restaurants/{id}', [RestaurantController::class, 'show']);
 Route::get('/restaurants', [RestaurantController::class, 'index']);
 // Protected routes for restaurant owners
 Route::middleware(['auth:sanctum', 'isOwner'])->group(function () {
+    Route::get('/owner-restaurants', [RestaurantController::class, 'getOwnerRestaurants'])->middleware('auth:api');
     Route::post('/restaurants', [RestaurantController::class, 'create']);
     Route::put('/restaurants/{restaurant}', [RestaurantController::class, 'update']);
     Route::delete('/restaurants/{restaurant}', [RestaurantController::class, 'destroy']);
@@ -46,20 +54,42 @@ Route::middleware(['auth:sanctum', 'isOwner'])->group(function () {
 // Menu Routes
 Route::middleware(['auth:sanctum', 'isOwner'])->group(function () {
     Route::apiResource('/menus', MenuController::class);
+    Route::get('/owner-menu', [MenuController::class, 'getOwnerMenu'])->middleware('auth:api');
+
 });
 
 // Dish Routes
 // Assuming that only owners should manage dishes
+Route::apiResource('/dishes', DishController::class);
+
+
 Route::middleware(['auth:sanctum', 'isOwner'])->group(function () {
-    Route::apiResource('dishes', DishController::class);
+    Route::get('/restaurant/orders', [OrderController::class, 'getRestaurantOrders']);
+    Route::post('/restaurant/orders/{id}/confirm', [OrderController::class, 'confirmOrder']);
 });
 
 // User Orders Routes
-Route::middleware('auth:sanctum')->prefix('users/{userId}/orders')->group(function () {
-    Route::apiResource('/', UserOrderController::class)->except(['index', 'store', 'show', 'update', 'destroy']);
-    Route::get('/', [UserOrderController::class, 'index']);
-    Route::post('/', [UserOrderController::class, 'store']);
-    Route::get('/{orderId}', [UserOrderController::class, 'show']);
-    Route::put('/{orderId}', [UserOrderController::class, 'update']);
-    Route::delete('/{orderId}', [UserOrderController::class, 'destroy']);
+// Add these inside your routes/api.php file
+
+// Protected routes for handling orders
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/orders', [OrderController::class, 'store']);
+    Route::get('/orders', [OrderController::class, 'index']); // List all orders for logged-in user
+    Route::get('/orders/{order}', [OrderController::class, 'show']); // Get a single order
+    Route::put('/orders/{order}', [OrderController::class, 'update']); // Update an order
+    Route::delete('/orders/{order}', [OrderController::class, 'destroy']); // Delete an order
 });
+
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/place-order', [UserOrderController::class, 'store']);
+    Route::get('/user/orders', [UserOrderController::class, 'getUserOrders']);
+});
+
+
+Route::middleware(['auth:sanctum', 'role:delivery'])->group(function () {
+    Route::get('/orders/available-for-delivery', [OrderController::class, 'availableForDelivery']);
+    Route::post('/orders/take-for-delivery/{orderId}', [OrderController::class, 'takeOrderForDelivery']);
+});
+
+
